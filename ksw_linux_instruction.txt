@@ -1,0 +1,117 @@
+Step 1.
+
+sudo mkdir /opt/ksw
+
+sudo nano /opt/kswk/ksw
+_keyboard.sh
+
+#
+# /usr/bin/env bash 
+
+# Check if binary exists and is executable
+TARGET="/opt/kswk/ksw"
+
+if [ -x "$TARGET" ]; then
+    nohup "$TARGET" >/dev/null 2>&1 &
+    disown
+else
+    echo "Executable not found at $TARGET" >&2
+    exit 1
+fi
+#
+
+sudo chmod +x /opt/kswk/ksw_keyboard.sh
+
+sudo apt install ibus
+ibus exit
+
+sudo mkdir /usr/share/ibus
+sudo mkdir /usr/share/ibus/component
+
+sudo /usr/share/ibus/component/ksw.xml
+#
+<?xml version="1.0" encoding="utf-8"?>
+<component>
+    <name>org.freedesktop.IBus.KhmerSmartWriter</name>
+    <description>Khmer Smart Writer input engine</description>
+    <exec>/opt/kswk/ksw --ibus</exec>
+    <version>0.1.0</version>
+    <author>Abdulrohman Abdolgony</author>
+    <license>MIT</license>
+    <homepage></homepage>
+    <textdomain>ksw</textdomain>
+    <engines>
+        <engine>
+        <name>ksw</name>
+        <language>km</language>
+        <license>MIT</license>
+        <author>Abdulrohman Abdolgony</author>
+        <icon>ibus-engine-default</icon>
+        <layout>us</layout>
+        <longname>Khmer Smart Writer</longname>
+        <description>Khmer input via the ksw engine</description>
+        <rank>99</rank>
+        </engine>
+    </engines>
+</component>   
+#
+
+# Verify 
+ls -l /usr/share/ibus/component/ksw.xml
+
+sudo chmod 644 /usr/share/ibus/component/ksw.xml
+
+
+ibus restart
+
+#fail
+ibus-daemon -d -x -r
+
+nano ~/.bashrc
+#add
+export GTK_IM_MODULE=ibus
+export QT_IM_MODULE=ibus
+export XMODIFIERS=@im=ibus
+
+# Save and exit (Ctrl+O, Enter, Ctrl+X) 
+
+source ~/.bashrc
+im-config -n ibus
+
+killall -9 ibus-daemon
+rm -f ~/.config/ibus/bus/*
+rm -rf ~/.cache/ibus
+ibus-daemon -d -x -r
+
+
+# verify
+ibus list-engine | grep ksw
+
+#fail
+ibus exit
+ibus-daemon -dxr
+
+export XDG_RUNTIME_DIR=/run/user/$(id -u)
+ibus restart
+
+ls -l /opt/kswk/ksw_keyboard.sh
+sudo chmod +x /opt/kswk/ksw_keyboard.sh
+sudo chmod -R +rx /opt/kswk
+
+ibus restart
+ibus list-engine | grep ksw
+
+Step 2.
+
+Download ksw to /opt/kswk/
+
+/opt/kswk/ksw_keyboard.sh
+# fail
+/opt/kswk/ksw
+
+Step 3.
+
+sudo apt update
+sudo apt install -y fonts-khmeros fonts-noto-core
+
+sudo apt install -y libpango-1.0-0 libharfbuzz0b

@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <title>Khmer QWERTY Four-State Overlay</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Khmer', Arial, sans-serif;
+      background-color: #f0f2f5;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 30px;
+    }
+    h1 { margin-bottom: 5px; color: #1a1a1a; }
+    p { color: #666; margin-bottom: 25px; }
+    
+    .legend {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 25px;
+      background: #fff;
+      padding: 12px 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-weight: bold; font-size: 14px; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+    
+    .keyboard {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background-color: #d1d5db;
+      padding: 18px;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+    .row { display: flex; gap: 6px; justify-content: center; }
+    
+    .key {
+      width: 68px;
+      height: 68px;
+      background-color: #ffffff;
+      border-radius: 6px;
+      position: relative;
+      box-shadow: 0 3px 0 #b0b5bd;
+      border: 1px solid #e5e7eb;
+      box-sizing: border-box;
+      font-size: 20px;
+    }
+    .label {
+      position: absolute;
+      font-size: 13px;
+      line-height: 1;
+    }
+    .key-cap-ref {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 10px;
+      color: #76787c;
+      font-weight: bold;
+      pointer-events: none;
+    }
+    
+    /* Quadrant Positioning */
+    .base-state  { top: 6px; left: 6px; color: #111827; font-size: 16px; font-weight: bold; } /* Bottom-Left */    
+    .ctrl-state  { top: 6px; right: 6px; color: #2563eb; }                  /* Top-Right */
+    .shift-state { bottom: 6px; left: 6px; color: #dc2626; font-weight: bold; }   /* Top-Left */
+    .alt-state   { bottom: 6px; right: 6px; color: #16a34a; }                /* Bottom-Right */
+  </style>
+</head>
+<body>
+
+  <h1>Khmer QWERTY Four-State Overlay</h1>
+  <p>Khmer Smart Writer Keyboard Engine [Esc toggle switch English | Khmer]-[Linux Delete to Exit]</p>
+
+  <div class="legend">
+    <div class="legend-item"><span class="dot" style="background:#111827;"></span> Regular Base (33 Consonants)</div>
+    <div class="legend-item"><span class="dot" style="background:#dc2626;"></span> Shift + Key (32 Coeng)</div>
+    <div class="legend-item"><span class="dot" style="background:#16a34a;"></span> Alt + Key (Dependent Vowels)</div>
+    <div class="legend-item"><span class="dot" style="background:#2563eb;"></span> Ctrl + Key (Independent Vowels/Signs)</div>
+  </div>
+
+  <div class="keyboard">
+    
+      <div class="row">
+        
+          <div class="key">
+            <span class="key-cap-ref">`</span>
+            <span class="label base-state">&#x1781;&#x17D2;&#x1789;&#x17BB;&#x17C6;</span>
+            <span class="label ctrl-state">&#x17F9;</span>
+            <span class="label shift-state">&#x17AF;</span>
+            <span class="label alt-state">&#x17A5;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">1</span>
+            <span class="label base-state">&#x17E1;</span>
+            <span class="label ctrl-state">&#x19E1;</span>
+            <span class="label shift-state">!</span>
+            <span class="label alt-state">&#x17BE;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">2</span>
+            <span class="label base-state">&#x17E2;</span>
+            <span class="label ctrl-state">&#x19E2;</span>
+            <span class="label shift-state">@</span>
+            <span class="label alt-state">&#x17BF;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">3</span>
+            <span class="label base-state">&#x17E3;</span>
+            <span class="label ctrl-state">&#x19E3;</span>
+            <span class="label shift-state">#</span>
+            <span class="label alt-state">&#x17C0;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">4</span>
+            <span class="label base-state">&#x17E4;</span>
+            <span class="label ctrl-state">&#x19E4;</span>
+            <span class="label shift-state">$</span>
+            <span class="label alt-state">&#x17C1;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">5</span>
+            <span class="label base-state">&#x17E5;</span>
+            <span class="label ctrl-state">&#x19E5;</span>
+            <span class="label shift-state">%</span>
+            <span class="label alt-state">&#x17C2;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">6</span>
+            <span class="label base-state">&#x17E6;</span>
+            <span class="label ctrl-state">&#x19E6;</span>
+            <span class="label shift-state">^</span>
+            <span class="label alt-state">&#x17C3;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">7</span>
+            <span class="label base-state">&#x17E7;</span>
+            <span class="label ctrl-state">&#x19E7;</span>
+            <span class="label shift-state">&</span>
+            <span class="label alt-state">&#x17C4;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">8</span>
+            <span class="label base-state">&#x17E8;</span>
+            <span class="label ctrl-state">&#x19E8;</span>
+            <span class="label shift-state">*</span>
+            <span class="label alt-state">&#x17C5;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">9</span>
+            <span class="label base-state">&#x17E9;</span>
+            <span class="label ctrl-state">&#x19E9;</span>
+            <span class="label shift-state">(</span>
+            <span class="label alt-state">&#x17C1;&#x17C7;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">0</span>
+            <span class="label base-state">&#x17E0;</span>
+            <span class="label ctrl-state">&#x19E0;</span>
+            <span class="label shift-state">)</span>
+            <span class="label alt-state">&#x17C4;&#x17C7;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">-</span>
+            <span class="label base-state">-</span>
+            <span class="label ctrl-state">&#x19F1;</span>
+            <span class="label shift-state">&#x17B3;</span>
+            <span class="label alt-state">&#x17BB;&#x17C7;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">=</span>
+            <span class="label base-state">=</span>
+            <span class="label ctrl-state">&#x19F2;</span>
+            <span class="label shift-state">+</span>
+            <span class="label alt-state">&#x17B7;&#x17C7;</span>
+          </div>
+        
+      </div>
+    
+      <div class="row">
+        
+          <div class="key">
+            <span class="key-cap-ref">Q</span>
+            <span class="label base-state">&#x1786;</span>
+            <span class="label ctrl-state">&#x19F3;</span>
+            <span class="label shift-state">&#x17D2;&#x1786;</span>
+            <span class="label alt-state">&#x17B6;&#x17C6;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">W</span>
+            <span class="label base-state">&#x1788;</span>
+            <span class="label ctrl-state">&#x19F4;</span>
+            <span class="label shift-state">&#x17D2;&#x1788;</span>
+            <span class="label alt-state">&#x17B7;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">E</span>
+            <span class="label base-state">&#x1792;</span>
+            <span class="label ctrl-state">&#x19F5;</span>
+            <span class="label shift-state">&#x17D2;&#x1792;</span>
+            <span class="label alt-state">&#x17B8;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">R</span>
+            <span class="label base-state">&#x179A;</span>
+            <span class="label ctrl-state">&#x19F6;</span>
+            <span class="label shift-state">&#x17D2;&#x179A;</span>
+            <span class="label alt-state">&#x17B9;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">T</span>
+            <span class="label base-state">&#x178F;</span>
+            <span class="label ctrl-state">&#x19F7;</span>
+            <span class="label shift-state">&#x17D2;&#x178F;</span>
+            <span class="label alt-state">&#x17BA;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">Y</span>
+            <span class="label base-state">&#x1799;</span>
+            <span class="label ctrl-state">&#x19F8;</span>
+            <span class="label shift-state">&#x17D2;&#x1799;</span>
+            <span class="label alt-state">&#x17BB;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">U</span>
+            <span class="label base-state">&#x1791;</span>
+            <span class="label ctrl-state">&#x19F9;</span>
+            <span class="label shift-state">&#x17D2;&#x1791;</span>
+            <span class="label alt-state">&#x17BC;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">I</span>
+            <span class="label base-state">&#x17A2;</span>
+            <span class="label ctrl-state">&#x19FA;</span>
+            <span class="label shift-state">&#x17D2;&#x17A2;</span>
+            <span class="label alt-state">&#x17BD;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">O</span>
+            <span class="label base-state">&#x178C;</span>
+            <span class="label ctrl-state">&#x19FB;</span>
+            <span class="label shift-state">&#x17D2;&#x178C;</span>
+            <span class="label alt-state">&#x17C6;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">P</span>
+            <span class="label base-state">&#x1795;</span>
+            <span class="label ctrl-state">&#x19FC;</span>
+            <span class="label shift-state">&#x17D2;&#x1795;</span>
+            <span class="label alt-state">&#x17BB;&#x17C6;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">[</span>
+            <span class="label base-state">&#x17A1;</span>
+            <span class="label ctrl-state">&#x19FD;</span>
+            <span class="label shift-state">&#x17D6;</span>
+            <span class="label alt-state">&#x17C7;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">]</span>
+            <span class="label base-state">&#x178D;</span>
+            <span class="label ctrl-state">&#x19FE;</span>
+            <span class="label shift-state">&#x17D2;&#x178D;</span>
+            <span class="label alt-state">&#x17A6;</span>
+          </div>
+
+          <div class="key">
+            <span class="key-cap-ref">\</span>
+            <span class="label base-state">&#x17D6;</span>
+            <span class="label ctrl-state">&#x19F0;</span>
+            <span class="label shift-state">&#x17DC;</span>
+            <span class="label alt-state">&#x19EA;</span>
+          </div>
+        
+      </div>
+    
+      <div class="row">
+        
+          <div class="key">
+            <span class="key-cap-ref">A</span>
+            <span class="label base-state">&#x1797;</span>
+            <span class="label ctrl-state">&#x17B0;</span>
+            <span class="label shift-state">&#x17D2;&#x1797;</span>
+            <span class="label alt-state">&#x17B6;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">S</span>
+            <span class="label base-state">&#x179F;</span>
+            <span class="label ctrl-state">&#x179D;</span>
+            <span class="label shift-state">&#x17D2;&#x179F;</span>
+            <span class="label alt-state">&#x17CD;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">D</span>
+            <span class="label base-state">&#x178A;</span>
+            <span class="label ctrl-state">&#x179E;</span>
+            <span class="label shift-state">&#x17D2;&#x178A;</span>
+            <span class="label alt-state">&#x17D0;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">F</span>
+            <span class="label base-state">&#x1790;</span>
+            <span class="label ctrl-state">&#x17F0;</span>
+            <span class="label shift-state">&#x17D2;&#x1790;</span>
+            <span class="label alt-state">&#x17CC;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">G</span>
+            <span class="label base-state">&#x1784;</span>
+            <span class="label ctrl-state">&#x17F1;</span>
+            <span class="label shift-state">&#x17D2;&#x1784;</span>
+            <span class="label alt-state">&#x17CA;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">H</span>
+            <span class="label base-state">&#x17A0;</span>
+            <span class="label ctrl-state">&#x17F2;</span>
+            <span class="label shift-state">&#x17D2;&#x17A0;</span>
+            <span class="label alt-state">&#x17CF;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">J</span>
+            <span class="label base-state">&#x1789;</span>
+            <span class="label ctrl-state">&#x17F3;</span>
+            <span class="label shift-state">&#x17D2;&#x1789;</span>
+            <span class="label alt-state">&#x17CE;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">K</span>
+            <span class="label base-state">&#x1780;</span>
+            <span class="label ctrl-state">&#x17F4;</span>
+            <span class="label shift-state">&#x17D2;&#x1780;</span>
+            <span class="label alt-state">&#x17DD;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">L</span>
+            <span class="label base-state">&#x179B;</span>
+            <span class="label ctrl-state">&#x17F7;</span>
+            <span class="label shift-state">&#x17D2;&#x179B;</span>
+            <span class="label alt-state">&#x17D3;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">;</span>
+            <span class="label base-state">&#x1782;</span>
+            <span class="label ctrl-state">&#x17F5;</span>
+            <span class="label shift-state">&#x17D2;&#x1782;</span>
+            <span class="label alt-state">&#x17CB;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">'</span>
+            <span class="label base-state">&#x1783;</span>
+            <span class="label ctrl-state">&#x19FF;</span>
+            <span class="label shift-state">&#x17D2;&#x1783;</span>
+            <span class="label alt-state">&#x17C9;</span>
+          </div>
+        
+      </div>
+    
+      <div class="row">
+        
+          <div class="key">
+            <span class="key-cap-ref">Z</span>
+            <span class="label base-state">&#x178B;</span>
+            <span class="label ctrl-state">&#x17C8;</span>
+            <span class="label shift-state">&#x17D2;&#x178B;</span>
+            <span class="label alt-state">&#x17D7;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">X</span>
+            <span class="label base-state">&#x1781;</span>
+            <span class="label ctrl-state">&#x17A8;</span>
+            <span class="label shift-state">&#x17D2;&#x1781;</span>
+            <span class="label alt-state">&#x17D5;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">C</span>
+            <span class="label base-state">&#x1785;</span>
+            <span class="label ctrl-state">&#x17A9;</span>
+            <span class="label shift-state">&#x17D2;&#x1785;</span>
+            <span class="label alt-state">&#x17AB;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">V</span>
+            <span class="label base-state">&#x179C;</span>
+            <span class="label ctrl-state">&#x17AA;</span>
+            <span class="label shift-state">&#x17D2;&#x179C;</span>
+            <span class="label alt-state">&#x17AC;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">B</span>
+            <span class="label base-state">&#x1794;</span>
+            <span class="label ctrl-state">&#x17A7;</span>
+            <span class="label shift-state">&#x17D2;&#x1794;</span>
+            <span class="label alt-state">&#x17AD;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">N</span>
+            <span class="label base-state">&#x1793;</span>
+            <span class="label ctrl-state">&#x17B2;</span>
+            <span class="label shift-state">&#x17D2;&#x1793;</span>
+            <span class="label alt-state">&#x17AE;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">M</span>
+            <span class="label base-state">&#x1798;</span>
+            <span class="label ctrl-state">&#x17F6;</span>
+            <span class="label shift-state">&#x17D2;&#x1798;</span>
+            <span class="label alt-state">&#x17B1;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">,</span>
+            <span class="label base-state">&#x178E;</span>
+            <span class="label ctrl-state">&#x17F8;</span>
+            <span class="label shift-state">&#x17D2;&#x178E;</span>
+            <span class="label alt-state">&#x17D4;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">.</span>
+            <span class="label base-state">&#x1787;</span>
+            <span class="label ctrl-state">&#x17D9;</span>
+            <span class="label shift-state">&#x17D2;&#x1787;</span>
+            <span class="label alt-state">&#x17DA;</span>
+          </div>
+        
+          <div class="key">
+            <span class="key-cap-ref">/</span>
+            <span class="label base-state">&#x1796;</span>
+            <span class="label ctrl-state">&#x17DB;</span>
+            <span class="label shift-state">&#x17D2;&#x1796;</span>
+            <span class="label alt-state">?</span>
+          </div>
+        
+      </div>
+    
+  </div>
+
+</body>
+</html>
