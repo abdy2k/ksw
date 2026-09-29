@@ -1,6 +1,6 @@
-# KSW — Khmer Smart Writer
+# Khmer Smart Writer Family, KSWK Keyboard, KSWKB On-Screen Keyboard and KSW — Khmer Smart Writer (Word Processor)
 
-A lightweight Khmer keyboard driver / input engine for typing Khmer Unicode text on Windows and Linux.
+A lightweight Khmer keyboard driver, On-Screen Keyboard Driver, Word Processor / input engine for typing Khmer Unicode text on Windows and Linux.
 
 KSW lets you type Khmer directly using a QWERTY keyboard layout, without needing to install a full IME suite. It's designed to be simple, portable, and easy to set up.
 
