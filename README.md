@@ -16,9 +16,12 @@ KSW lets you type Khmer directly using a QWERTY keyboard layout, without needing
 
 ### Windows
 
-1. Download `kswk.exe` from this repository.
-2. Run it directly — no installation required.
-3. Refer to `qwerty_ksw_keyboard.pdf` for the key layout.
+1. Download `kswkb.exe` from this repository or
+2. Download `kswk.zip` from this repository or
+3. Download `ksw.7z` from this repository or all in one
+4. Download `ksw_rel.7z` from this repository.
+5. Run it directly — no installation required.
+6. Refer to `qwerty_ksw_keyboard.pdf` for the key layout for Windows OS and Linux OS none Visual On-Screen Keyboard.
 
 ### Linux
 
