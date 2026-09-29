@@ -38,6 +38,8 @@ Open `keyboard.html` in any modern browser to try the Khmer layout without insta
 
 ## Keyboard Layout
 
+<img width="614" height="263" alt="image" src="https://github.com/user-attachments/assets/1b792468-7eb6-4607-8343-fd7703237eda" />
+
 The `qwerty_ksw_keyboard.pdf` file contains the full key mapping — print it out or keep it open alongside your keyboard while you learn the layout.
 
 ## Why KSW?
