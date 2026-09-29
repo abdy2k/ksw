@@ -16,7 +16,7 @@ KSW lets you type Khmer directly using a QWERTY keyboard layout, without needing
 
 ### Windows
 
-1. Download `ksw.exe` from this repository.
+1. Download `kswk.exe` from this repository.
 2. Run it directly — no installation required.
 3. Refer to `qwerty_ksw_keyboard.pdf` for the key layout.
 
@@ -30,7 +30,7 @@ KSW lets you type Khmer directly using a QWERTY keyboard layout, without needing
    cd kswk
    ```
 3. Run the setup script included inside the extracted folder to install and launch the driver.
-4. See `ksw_linux_instruction.txt` for detailed steps specific to your distro.
+4. See `kswk_linux_instruction.txt` for detailed steps specific to your distro.
 
 ### Browser demo
 
