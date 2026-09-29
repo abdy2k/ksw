@@ -7,7 +7,7 @@ KSW lets you type Khmer directly using a QWERTY keyboard layout, without needing
 ## Features
 
 - Khmer Unicode text input via a QWERTY-mapped layout
-- Native driver for **Windows** (`ksw.exe`) and **Linux** (`ksw`)
+- Native driver for **Windows** (`kswk.exe`) and **Linux** (`kswk`)
 - Browser-based reference/demo layout (`keyboard.html`)
 - Printable QWERTY-to-Khmer keyboard layout chart (`qwerty_ksw_keyboard.pdf`)
 - MIT licensed — free to use, modify, and distribute
