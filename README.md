@@ -26,6 +26,7 @@ KSW lets you type Khmer directly using a QWERTY keyboard layout, without needing
 2. Extract it:
    ```bash
    unzip kswk.zip
+   or ksw_rel.7z
    cd kswk
    ```
 3. Run the setup script included inside the extracted folder to install and launch the driver.
