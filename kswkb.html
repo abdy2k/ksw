@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Khmer QWERTY Four-State Interactive Keyboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Noto Sans Khmer', 'Inter', sans-serif;
+      background-color: #0f172a;
+      color: #f8fafc;
+      min-height: 100vh;      
+    }
+
+    .key-cap {
+      user-select: none;
+      transition: all 0.08s ease;
+      touch-action: manipulation;
+    }
+
+    .key-cap:active, .key-cap.is-pressed {
+      transform: translateY(2px) scale(0.97);
+      box-shadow: 0 1px 0 #1e293b !important;
+    }
+
+    /* Latched Modifier State Visuals */
+    .key-cap.is-latched {
+      transform: translateY(1px);
+      box-shadow: 0 0 12px rgba(59, 130, 246, 0.5), inset 0 0 8px rgba(255, 255, 255, 0.2) !important;
+      border-color: rgba(255, 255, 255, 0.8) !important;
+    }
+    .key-cap.is-latched[data-code*="Shift"] {
+      background-color: #991b1b !important;
+      color: #ffffff !important;
+    }
+    .key-cap.is-latched[data-code*="Alt"] {
+      background-color: #065f46 !important;
+      color: #ffffff !important;
+    }
+    .key-cap.is-latched[data-code*="Control"] {
+      background-color: #1e40af !important;
+      color: #ffffff !important;
+    }
+
+    /* Quadrant Highlights */
+    .state-active-base .base-state { font-weight: 200; transform: scale(1.15); filter: drop-shadow(0 0 2px rgba(255,255,255,0.8)); }
+    .state-active-shift .shift-state { font-weight: 700; transform: scale(1.15); filter: drop-shadow(0 0 3px rgba(239, 68, 68, 0.8)); }
+    .state-active-alt .alt-state { font-weight: 700; transform: scale(1.15); filter: drop-shadow(0 0 3px rgba(34, 197, 94, 0.8)); }
+    .state-active-ctrl .ctrl-state { font-weight: 700; transform: scale(1.15); filter: drop-shadow(0 0 3px rgba(59, 130, 246, 0.8)); }
+
+    /* Key Label Transitions */
+    .label {
+      transition: transform 0.15s ease, opacity 0.15s ease;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1e293b;
+      border-radius: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #475569;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="flex flex-col items-center justify-between p-4 md:p-8 min-h-screen">
+
+  <div class="w-full max-w-5xl flex flex-col items-center gap-6" style="margin-top: -30px;">
+    
+    <!-- Header Title & Controls -->
+     <!--
+    <header class="text-center w-full">      
+      <div class="flex items-center justify-center gap-3 mb-1">
+        <h1 class="text-2xl md:text-3xl font-bold bg-gradient-to-r from-blue-400 via-emerald-400 to-red-400 bg-clip-text text-transparent">
+          Khmer QWERTY Four-State Overlay
+        </h1>
+        <span id="modeBadge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase">
+          Khmer Mode
+        </span>
+      </div>
+      <p class="text-slate-400 text-xs md:text-sm">
+        Press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-xs">Esc</kbd> to toggle between English & Khmer | Click or press <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-xs">Shift</kbd>, <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-xs">Alt</kbd>, or <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-xs">Ctrl</kbd> to latch state until next character key press
+      </p>      
+    </header>
+    -->
+
+    <!-- Interactive Typing Area -->
+    <main class="w-full bg-slate-900 border border-slate-800 rounded-2xl p-4 shadow-2xl flex flex-col gap-3">
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <div class="flex items-center gap-2 text-xs font-medium text-slate-400">
+          <kbd class="px-1.5 py-0.5 bg-slate-800 border border-slate-700 rounded text-slate-300 text-xs">Esc</kbd> to toggle between English & Khmer
+          <span id="modeBadge" class="bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase">
+            Khmer Mode
+          </span>
+          <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+          Interactive Document Editor
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="copyBtn" class="px-3 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-medium rounded-lg transition-colors flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
+            Copy Text
+          </button>
+          <button id="clearBtn" class="px-3 py-1 bg-red-950/40 hover:bg-red-900/50 text-red-400 border border-red-900/50 text-xs font-medium rounded-lg transition-colors flex items-center gap-1">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+            Clear
+          </button>
+        </div>
+      </div>
+      <textarea id="typingArea" class="w-full h-36 bg-slate-950/70 border border-slate-800/80 rounded-xl p-4 text-xl text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 custom-scrollbar resize-none font-normal leading-relaxed" placeholder="ស្វាគមប្រីយមិត្ត Start typing here using your physical keyboard or click the virtual keys below..."></textarea>
+      
+      <!-- Toast Alert System -->
+      <div id="toast" class="hidden transition-all duration-300 text-xs text-emerald-400 bg-emerald-950/60 border border-emerald-800/50 px-3 py-1.5 rounded-lg text-center w-fit self-center">
+        Text copied to clipboard!
+      </div>
+    </main>
+
+    <!-- Legend Panel -->
+    <!--
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full text-xs">
+      <div id="legendBase" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-slate-100 shadow-sm shadow-slate-100/50"></span>
+        <span class="text-slate-300 font-medium">Base State (33 Consonants)</span>
+      </div>
+      <div id="legendShift" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span>
+        <span class="text-slate-300 font-medium">Shift State (32 Coeng Subscripts)</span>
+      </div>
+      <div id="legendAlt" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+        <span class="text-slate-300 font-medium">Alt State (Dependent Vowels)</span>
+      </div>
+      <div id="legendCtrl" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span>
+        <span class="text-slate-300 font-medium">Ctrl State (Independent/Signs)</span>
+      </div>
+    </div>
+    -->
+
+    <!-- Keyboard Graphic Container -->
+    <div id="keyboard" class="keyboard state-active-base w-full bg-slate-900/90 border border-slate-800 p-3 md:p-5 rounded-2xl shadow-2xl flex flex-col gap-2 overflow-x-auto">
+      
+      <!-- Row 1: Number Row -->
+      <div class="flex gap-1.5 justify-center min-w-[760px]">
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Backquote">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">`</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1781;&#x17D2;&#x1789;&#x17BB;&#x17C6;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F9;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x17AF;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17A5;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit1">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">1</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E1;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E1;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">!</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BE;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit2">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">2</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E2;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E2;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">@</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BF;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit3">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">3</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E3;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E3;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">#</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C0;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit4">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">4</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E4;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E4;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">$</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C1;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit5">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">5</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E5;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E5;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">%</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C2;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit6">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">6</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E6;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E6;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">^</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C3;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit7">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">7</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E7;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E7;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C4;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit8">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">8</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E8;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E8;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">*</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C5;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit9">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">9</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E9;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E9;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">(</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C1;&#x17C7;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Digit0">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">0</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17E0;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19E0;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">)</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C4;&#x17C7;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Minus">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">-</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">-</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F1;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x17B3;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BB;&#x17C7;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Equal">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">=</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">=</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F2;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">+</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B7;&#x17C7;</span>
+        </div>
+
+        <div class="key-cap flex-[1.5] min-w-[65px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-action="backspace" data-code="Backspace">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Back</span>
+        </div>
+      </div>
+
+      <!-- Row 2: QWERTY Row -->
+      <div class="flex gap-1.5 justify-center min-w-[760px]">
+        <div class="key-cap flex-[1.2] min-w-[55px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-action="tab" data-code="Tab">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Tab</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyQ">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">Q</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1786;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F3;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1786;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B6;&#x17C6;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyW">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">W</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1788;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F4;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1788;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B7;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyE">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">E</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1792;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F5;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1792;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B8;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyR">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">R</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x179A;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F6;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x179A;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B9;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyT">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">T</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x178F;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F7;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x178F;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BA;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyY">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">Y</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1799;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F8;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1799;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BB;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyU">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">U</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1791;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F9;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1791;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BC;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyI">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">I</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17A2;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19FA;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x17A2;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BD;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyO">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">O</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x178C;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19FB;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x178C;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C6;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyP">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">P</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1795;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19FC;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1795;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17BB;&#x17C6;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="BracketLeft">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">[</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17A1;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19FD;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x17D6;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C7;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="BracketRight">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">]</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x178D;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19FE;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x178D;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17A6;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Backslash">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">\</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17D6;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19F0;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x17DC;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x19EA;</span>
+        </div>
+      </div>
+
+      <!-- Row 3: Home Row -->
+      <div class="flex gap-1.5 justify-center min-w-[760px]">
+        <div id="modeToggleKey" class="key-cap flex-[1.5] min-w-[70px] h-14 bg-slate-700/80 border border-slate-600/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-600 transition-colors">
+          <span id="modeKeyLabel" class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Khmer</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyA">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">A</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1797;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17B0;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1797;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B6;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyS">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">S</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x179F;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x179D;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x179F;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17CD;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyD">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">D</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x178A;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x179E;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x178A;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17D0;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyF">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">F</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1790;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F0;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1790;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17CC;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyG">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">G</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1784;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F1;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1784;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17CA;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyH">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">H</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x17A0;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F2;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x17A0;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17CF;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyJ">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">J</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1789;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F3;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1789;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17CE;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyK">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">K</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1780;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F4;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1780;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17DD;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyL">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">L</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x179B;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F7;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x179B;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17D3;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Semicolon">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">;</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1782;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F5;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1782;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17CB;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Quote">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">'</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1783;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x19FF;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1783;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17C9;</span>
+        </div>
+
+        <div class="key-cap flex-[1.8] min-w-[80px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-action="enter" data-code="Enter">
+          <span class="text-xs text-slate-400 font-bold uppercase tracking-wider">Enter</span>
+        </div>
+      </div>
+
+      <!-- Row 4: Bottom Alpha Row -->
+      <div class="flex gap-1.5 justify-center min-w-[760px]">
+        <div class="key-cap flex-[2] min-w-[95px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-code="ShiftLeft">
+          <span class="text-xs text-red-400 font-bold uppercase tracking-wider">Shift</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyZ">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">Z</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x178B;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17C8;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x178B;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17D7;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyX">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">X</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1781;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17A8;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1781;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17D5;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyC">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">C</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1785;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17A9;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1785;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17AB;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyV">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">V</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x179C;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17AA;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x179C;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17AC;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyB">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">B</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1794;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17A7;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1794;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17AD;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyN">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">N</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1793;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17B2;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1793;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17AE;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="KeyM">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">M</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1798;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F6;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1798;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17B1;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Comma">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">,</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x178E;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17F8;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x178E;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17D4;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Period">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">.</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1787;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17D9;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1787;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">&#x17DA;</span>
+        </div>
+
+        <div class="key-cap key flex-1 min-w-[48px] h-14 bg-slate-800 border border-slate-700/80 rounded-lg relative cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-code="Slash">
+          <span class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-semibold pointer-events-none">/</span>
+          <span class="label base-state absolute top-1 left-1.5 text-slate-100 text-sm font-semibold">&#x1796;</span>
+          <span class="label ctrl-state absolute top-1 right-1.5 text-blue-400 text-xs">&#x17DB;</span>
+          <span class="label shift-state absolute bottom-1 left-1.5 text-red-400 text-xs font-semibold">&#x00A0;&#x17D2;&#x1796;</span>
+          <span class="label alt-state absolute bottom-1 right-1.5 text-emerald-400 text-xs">?</span>
+        </div>
+
+        <div class="key-cap flex-[2] min-w-[95px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-code="ShiftRight">
+          <span class="text-xs text-red-400 font-bold uppercase tracking-wider">Shift</span>
+        </div>
+      </div>
+
+      <!-- Row 5: Modifiers & Space -->
+      <div class="flex gap-1.5 justify-center min-w-[760px]">
+        <div class="key-cap flex-1 min-w-[60px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-code="ControlLeft">
+          <span class="text-xs text-blue-400 font-bold uppercase tracking-wider">Ctrl</span>
+        </div>
+
+        <div class="key-cap flex-1 min-w-[60px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-code="AltLeft">
+          <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Alt</span>
+        </div>
+
+        <div class="key-cap flex-[6] h-14 bg-slate-800/90 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700/80" data-action="space" data-code="Space">
+          <span class="text-xs text-slate-500 font-medium uppercase tracking-widest">Space</span>
+        </div>
+
+        <div class="key-cap flex-1 min-w-[60px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-code="AltRight">
+          <span class="text-xs text-emerald-400 font-bold uppercase tracking-wider">Alt</span>
+        </div>
+
+        <div class="key-cap flex-1 min-w-[60px] h-14 bg-slate-800/80 border border-slate-700/80 rounded-lg flex items-center justify-center cursor-pointer shadow-[0_3px_0_#1e293b] hover:bg-slate-700" data-code="ControlRight">
+          <span class="text-xs text-blue-400 font-bold uppercase tracking-wider">Ctrl</span>
+        </div>
+      </div>
+
+    </div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 w-full text-xs">
+      <div id="legendBase" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-slate-100 shadow-sm shadow-slate-100/50"></span>
+        <span class="text-slate-300 font-medium">Base State (33 Consonants)</span>
+      </div>
+      <div id="legendShift" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-red-500 shadow-sm shadow-red-500/50"></span>
+        <span class="text-slate-300 font-medium">Shift State (32 Coeng Subscripts)</span>
+      </div>
+      <div id="legendAlt" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
+        <span class="text-slate-300 font-medium">Alt State (Dependent Vowels)</span>
+      </div>
+      <div id="legendCtrl" class="flex items-center gap-2 bg-slate-900/80 border border-slate-800 px-3 py-2 rounded-xl transition-all">
+        <span class="w-3 h-3 rounded-full bg-blue-500 shadow-sm shadow-blue-500/50"></span>
+        <span class="text-slate-300 font-medium">Ctrl State (Independent/Signs)</span>
+      </div>
+    </div>
+
+    <!-- Instructions / Footer Info -->
+    <footer class="text-center text-xs text-slate-500 max-w-2xl leading-relaxed">      
+      <p>Supports physical typing and mouse clicking with latched modifier key support. Pressing <kbd class="px-1 text-slate-400 border border-slate-700 rounded bg-slate-800">Esc</kbd> alternates standard English QWERTY typing and Khmer layout processing.</p>
+    </footer>
+  </div>
+
+  <script>
+    // System State Variables
+    let currentMode = 'khmer'; // 'khmer' or 'english'
+    let currentLayer = 'base'; // 'base', 'shift', 'alt', 'ctrl'
+    let latchedModifier = null; // null, 'shift', 'alt', 'ctrl'
+
+    // DOM References
+    const keyboardEl = document.getElementById('keyboard');
+    const typingArea = document.getElementById('typingArea');
+    const modeBadge = document.getElementById('modeBadge');
+    const modeKeyLabel = document.getElementById('modeKeyLabel');
+    const modeToggleKey = document.getElementById('modeToggleKey');
+    const copyBtn = document.getElementById('copyBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const toast = document.getElementById('toast');
+
+    // Legend DOM References
+    const legendBase = document.getElementById('legendBase');
+    const legendShift = document.getElementById('legendShift');
+    const legendAlt = document.getElementById('legendAlt');
+    const legendCtrl = document.getElementById('legendCtrl');
+
+    function updateLayerState(e) {
+      // Calculate active modifier layer (physical hold overrides or latched state)
+      let newLayer = 'base';
+      if (e && (e.ctrlKey || e.altKey || e.shiftKey)) {
+        if (e.ctrlKey) newLayer = 'ctrl';
+        else if (e.altKey) newLayer = 'alt';
+        else if (e.shiftKey) newLayer = 'shift';
+      } else if (latchedModifier) {
+        newLayer = latchedModifier;
+      }
+
+      currentLayer = newLayer;
+
+      // Reset state classes on keyboard container
+      keyboardEl.classList.remove('state-active-base', 'state-active-shift', 'state-active-alt', 'state-active-ctrl');
+      keyboardEl.classList.add(`state-active-${currentLayer}`);
+
+      // Highlight Legend Cards
+      [legendBase, legendShift, legendAlt, legendCtrl].forEach(card => {
+        card.classList.remove('border-emerald-500/50', 'bg-slate-800');
+      });
+
+      if (currentLayer === 'base') legendBase.classList.add('border-emerald-500/50', 'bg-slate-800');
+      if (currentLayer === 'shift') legendShift.classList.add('border-emerald-500/50', 'bg-slate-800');
+      if (currentLayer === 'alt') legendAlt.classList.add('border-emerald-500/50', 'bg-slate-800');
+      if (currentLayer === 'ctrl') legendCtrl.classList.add('border-emerald-500/50', 'bg-slate-800');
+
+      // Update latched UI states on key caps
+      document.querySelectorAll('.key-cap').forEach(cap => cap.classList.remove('is-latched'));
+      if (latchedModifier) {
+        const codeMap = {
+          'shift': ['ShiftLeft', 'ShiftRight'],
+          'alt': ['AltLeft', 'AltRight'],
+          'ctrl': ['ControlLeft', 'ControlRight']
+        };
+        codeMap[latchedModifier].forEach(code => {
+          const el = document.querySelector(`[data-code="${code}"]`);
+          if (el) el.classList.add('is-latched');
+        });
+      }
+    }
+
+    function toggleLatch(modifier) {
+      if (latchedModifier === modifier) {
+        latchedModifier = null; // Un-latch if toggled again
+      } else {
+        latchedModifier = modifier; // Latch new modifier
+      }
+      updateLayerState(null);
+    }
+
+    function consumeLatch() {
+      if (latchedModifier) {
+        latchedModifier = null;
+        updateLayerState(null);
+      }
+    }
+
+    function toggleMode() {
+      if (currentMode === 'khmer') {
+        currentMode = 'english';
+        modeBadge.textContent = 'English Mode';
+        modeBadge.className = 'bg-blue-500/20 text-blue-300 border border-blue-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase';
+        modeKeyLabel.textContent = 'English';
+        modeKeyLabel.className = 'text-xs text-blue-400 font-bold uppercase tracking-wider';
+      } else {
+        currentMode = 'khmer';
+        modeBadge.textContent = 'Khmer Mode';
+        modeBadge.className = 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-3 py-1 rounded-full text-xs font-semibold tracking-wider uppercase';
+        modeKeyLabel.textContent = 'Khmer';
+        modeKeyLabel.className = 'text-xs text-emerald-400 font-bold uppercase tracking-wider';
+      }
+    }
+
+    function insertText(text) {
+      const start = typingArea.selectionStart;
+      const end = typingArea.selectionEnd;
+      const val = typingArea.value;
+
+      typingArea.value = val.substring(0, start) + text + val.substring(end);
+      typingArea.selectionStart = typingArea.selectionEnd = start + text.length;
+      typingArea.focus();
+    }
+
+    function removeCharacter() {
+      const start = typingArea.selectionStart;
+      const end = typingArea.selectionEnd;
+      const val = typingArea.value;
+
+      if (start === end && start > 0) {
+        typingArea.value = val.substring(0, start - 1) + val.substring(end);
+        typingArea.selectionStart = typingArea.selectionEnd = start - 1;
+      } else if (start !== end) {
+        typingArea.value = val.substring(0, start) + val.substring(end);
+        typingArea.selectionStart = typingArea.selectionEnd = start;
+      }
+      typingArea.focus();
+    }
+
+    window.addEventListener('keydown', (e) => {
+      // Escape key mode toggle
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        toggleMode();
+        return;
+      }
+
+      // Handle modifier keys latching on physical key press
+      if (e.code.startsWith('Shift')) {
+        if (!e.repeat) toggleLatch('shift');
+        return;
+      }
+      if (e.code.startsWith('Alt')) {
+        e.preventDefault();
+        if (!e.repeat) toggleLatch('alt');
+        return;
+      }
+      if (e.code.startsWith('Control')) {
+        if (!e.repeat) toggleLatch('ctrl');
+        return;
+      }
+
+      updateLayerState(e);
+
+      // Visual press feedback
+      const keyCap = document.querySelector(`[data-code="${e.code}"]`);
+      if (keyCap) keyCap.classList.add('is-pressed');
+
+      // If typing in Khmer mode, intercept alpha-numeric and standard symbols
+      if (currentMode === 'khmer' && keyCap && !e.metaKey) {
+        const action = keyCap.getAttribute('data-action');
+        
+        if (action === 'backspace') {
+          consumeLatch();
+          return;
+        }
+
+        if (action === 'space') {
+          e.preventDefault();
+          insertText(' ');
+          consumeLatch();
+          return;
+        }
+
+        if (action === 'enter') {
+          e.preventDefault();
+          insertText('\n');
+          consumeLatch();
+          return;
+        }
+
+        if (action === 'tab') {
+          e.preventDefault();
+          insertText('\t');
+          consumeLatch();
+          return;
+        }
+
+        // Get corresponding layer label text
+        const targetLabel = keyCap.querySelector(`.${currentLayer}-state`);
+        if (targetLabel) {
+          e.preventDefault();
+          const textToInsert = targetLabel.textContent.trim();
+          if (textToInsert) {
+            insertText(textToInsert);
+            consumeLatch();
+          }
+        }
+      } else if (currentMode === 'english' && !['ShiftLeft', 'ShiftRight', 'AltLeft', 'AltRight', 'ControlLeft', 'ControlRight', 'MetaLeft', 'MetaRight'].includes(e.code)) {
+        consumeLatch();
+      }
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const keyCap = document.querySelector(`[data-code="${e.code}"]`);
+      if (keyCap) keyCap.classList.remove('is-pressed');
+    });
+
+    keyboardEl.addEventListener('click', (e) => {
+      const keyCap = e.target.closest('.key-cap');
+      if (!keyCap) return;
+
+      if (keyCap === modeToggleKey) {
+        toggleMode();
+        return;
+      }
+
+      const code = keyCap.getAttribute('data-code');
+
+      // Modifier key clicks latch/unlatch states
+      if (code && code.startsWith('Shift')) {
+        toggleLatch('shift');
+        return;
+      }
+      if (code && code.startsWith('Alt')) {
+        toggleLatch('alt');
+        return;
+      }
+      if (code && code.startsWith('Control')) {
+        toggleLatch('ctrl');
+        return;
+      }
+
+      const action = keyCap.getAttribute('data-action');
+      if (action === 'backspace') {
+        removeCharacter();
+        consumeLatch();
+        return;
+      }
+      if (action === 'space') {
+        insertText(' ');
+        consumeLatch();
+        return;
+      }
+      if (action === 'enter') {
+        insertText('\n');
+        consumeLatch();
+        return;
+      }
+      if (action === 'tab') {
+        insertText('\t');
+        consumeLatch();
+        return;
+      }
+
+      // Read active state character from key cap
+      const targetLabel = keyCap.querySelector(`.${currentLayer}-state`);
+      if (targetLabel) {
+        const textToInsert = targetLabel.textContent.trim();
+        if (textToInsert) {
+          insertText(textToInsert);
+          consumeLatch();
+        }
+      }
+    });
+
+    copyBtn.addEventListener('click', () => {
+      if (!typingArea.value) return;
+      typingArea.select();
+      document.execCommand('copy');
+      
+      // Toast notification
+      toast.classList.remove('hidden');
+      setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2000);
+    });
+
+    clearBtn.addEventListener('click', () => {
+      typingArea.value = '';
+      typingArea.focus();
+    });
+
+    // Initial state Setup
+    updateLayerState(null);
+    typingArea.focus();
+  </script>
+</body>
+</html>
