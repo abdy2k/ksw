@@ -27,7 +27,7 @@ ibus exit
 sudo mkdir /usr/share/ibus
 sudo mkdir /usr/share/ibus/component
 
-sudo /usr/share/ibus/component/kswk.xml
+sudo nano /usr/share/ibus/component/kswk.xml
 #
 <?xml version="1.0" encoding="utf-8"?>
 <component>
