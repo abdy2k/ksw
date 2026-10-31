@@ -19,6 +19,10 @@ else
 fi
 #
 
+sudo chown $USER:$USER /opt/kswk/kswk
+sudo chmod +x /opt/kswk/kswk
+
+sudo chown $USER:$USER /opt/kswk/kswk_keyboard.sh
 sudo chmod +x /opt/kswk/kswk_keyboard.sh
 
 sudo apt install ibus
